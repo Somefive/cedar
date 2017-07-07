@@ -30,11 +30,13 @@
         	return [
             {
               begin: 0,
-              end: 1000
+              end: 1000,
+              measures: [{begin: 0, end: 50}, {begin: 60, end:280}]
             },
             {
               begin: 1050,
-              end: 2000
+              end: 2000,
+              measures: [{begin: 60, end: 250}, {begin: 260, end:480}]
             }
           ]
         }

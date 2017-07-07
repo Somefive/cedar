@@ -1,12 +1,15 @@
 <template>
   <div class="system-display"
        :style="{background: background, height: height+'px', top: system.begin+'px'}">
+    <measure-display v-for="(measure, index) in system.measures" :measure="measure" :key="index">
+    </measure-display>
   </div>
 </template>
 
 <script>
+  import MeasureDisplay from "./MeasureDisplay";
   export default {
-    components: {},
+    components: {MeasureDisplay},
     name: 'system-display',
     props: {
     	system: {
