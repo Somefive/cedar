@@ -1,28 +1,33 @@
 <template>
-  <div class="canvas-display" ref="display"
-       @mousedown="startMove" @mouseup="endMove"
-       @mousemove="move" @moveLeave="endMove"
-       @touchstart="startMove" @touchmove="move" @touchend="endMove"
-       :style="{transform: transform, 'transform-origin': transformOrigin}">
-    <canvas ref="canvas"></canvas>
-    <div class="systems-display" ref="systems" :style="{height: canvasHeight+'px', width: canvasWidth+'px'}">
-      <system-display v-for="(system, index) in systems" :system="system" :key="index"></system-display>
+  <div @wheel="wheel" class="canvas-display-container" ref="display">
+    <vue-slider v-if="imageDisplayed"
+                v-model="scale"
+                :direction="'vertical'"
+                :min="0.1" :max="5.0" :interval="0.1"
+                :height="'75%'" :width="15"
+                class="scale-slider"></vue-slider>
+    <div class="canvas-display" v-show="imageDisplayed"
+         @mousedown="startMove" @mouseup="endMove"
+         @mousemove="move" @mouseleave="endMove"
+         @touchstart="startMove" @touchmove="move" @touchend="endMove"
+         :style="{transform: transform, 'transform-origin': transformOrigin}">
+      <canvas ref="canvas"></canvas>
+      <div class="systems-display" ref="systems" :style="{height: canvasHeight+'px', width: canvasWidth+'px'}">
+        <system-display v-for="(system, index) in systems" :system="system" :key="index"></system-display>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
   import SystemDisplay from "./SystemDisplay";
+  import vueSlider from 'vue-slider-component'
   export default {
-    components: {SystemDisplay},
+    components: {SystemDisplay, vueSlider},
     name: 'canvas-display',
     props: {
       image: {
       	required: true
-      },
-      scale: {
-      	type: Number,
-        default: 1
       },
       systems: {
       	type: Array,
@@ -30,12 +35,12 @@
         	return [
             {
               begin: 0,
-              end: 1000,
+              end: 200,
               measures: [{begin: 0, end: 50}, {begin: 60, end:280}]
             },
             {
-              begin: 1050,
-              end: 2000,
+              begin: 250,
+              end: 500,
               measures: [{begin: 60, end: 250}, {begin: 260, end:480}]
             }
           ]
@@ -48,6 +53,9 @@
       },
       transformOrigin: function() {
     		return (this.transformOriginX) + "px " + (this.transformOriginY) + "px";
+      },
+      imageDisplayed: function() {
+        return this.image && this.image.height;
       }
     },
     data () {
@@ -57,7 +65,8 @@
         transformOriginX: 0,
         transformOriginY: 0,
         canvasHeight: 0,
-        canvasWidth: 0
+        canvasWidth: 0,
+        scale: 1
       }
     },
     watch: {
@@ -70,6 +79,7 @@
         ctx.drawImage(newImage, 0, 0, this.canvasWidth, this.canvasHeight);
         this.transformOriginX = this.$refs.display.clientWidth/2;
         this.transformOriginY = this.$refs.display.clientHeight/2;
+        this.scaleToFit();
       },
       scale: function(newScale) {
         this.fitXY();
@@ -119,6 +129,17 @@
           this.offsetY = Math.max((this.$refs.display.clientHeight-this.canvasHeight*this.scale)+beginY+dy, this.offsetY);
           this.offsetY = Math.min(beginY-dy, this.offsetY);
         }
+      },
+      scaleToFit() {
+      	let _scale = Math.min(this.$refs.display.clientWidth/this.canvasWidth, this.$refs.display.clientHeight/this.canvasHeight);
+      	_scale = parseInt(_scale*10)/10;
+      	this.scale = Math.min(5, Math.max(0.1, _scale));
+      },
+      wheel: function(event) {
+        let delta = (event.deltaX+event.deltaY+event.deltaZ)>0?-1:1;
+        this.scale = parseInt(this.scale*10+delta)/10;
+        if (this.scale < 0.1) this.scale = 0.1;
+        else if (this.scale > 5) this.scale = 5;
       }
     }
   }
@@ -128,6 +149,7 @@
   .canvas-display {
     height: 100%;
     width: 100%;
+    position: absolute;
   }
   .canvas-display:hover {
     cursor: move;
@@ -143,5 +165,15 @@
     z-index: 200;
     top: 0;
     left: 0;
+  }
+  .scale-slider {
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    z-index: 700;
+  }
+  .canvas-display-container {
+    width: 100%;
+    height: 100%;
   }
 </style>
