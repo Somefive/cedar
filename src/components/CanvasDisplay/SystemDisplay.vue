@@ -1,7 +1,7 @@
 <template>
   <div class="system-display"
-       :style="{background: background, height: height+'px', top: system.begin+'px'}">
-    <measure-display v-for="(measure, index) in system.measures" :measure="measure" :key="index">
+       :style="{background: background, height: height+'px', top: (system.begin+1)+'px'}">
+    <measure-display v-for="(measure, index) in measures" :measure="measure" :key="index">
     </measure-display>
   </div>
 </template>
@@ -22,7 +22,14 @@
       }
     },
     computed: {
-    	height: function() { return this.system.end - this.system.begin; }
+    	height: function() { return this.system.end - this.system.begin - 2; },
+    	measures: function() {
+    		let arr = [], length = this.system.barlines?this.system.barlines.length:0;
+        for(let i=0;i<length-1;++i) {
+        	arr.push({begin: this.system.barlines[i]+1, end: this.system.barlines[i+1]-1})
+        }
+        return arr;
+      }
     },
     data () {
       return {

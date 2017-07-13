@@ -33,16 +33,6 @@
       	type: Array,
         default: function() {
         	return [
-            {
-              begin: 0,
-              end: 200,
-              measures: [{begin: 0, end: 50}, {begin: 60, end:280}]
-            },
-            {
-              begin: 250,
-              end: 500,
-              measures: [{begin: 60, end: 250}, {begin: 260, end:480}]
-            }
           ]
         }
       }
